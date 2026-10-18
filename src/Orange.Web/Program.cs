@@ -1,7 +1,10 @@
 using MudBlazor.Services;
 using Serilog;
+using Orange.Application;
+using Orange.Application.Abstractions;
 using Orange.Infrastructure;
 using Orange.Infrastructure.Persistence.Seed;
+using Orange.Web.Auth;
 using Orange.Web.Components;
 
 Log.Logger = new LoggerConfiguration()
@@ -19,9 +22,17 @@ try
 
     builder.Services.AddMudServices();
 
+    builder.Services.AddSingleton(TimeProvider.System);
+
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
         ?? "Server=(localdb)\\mssqllocaldb;Database=Orange;Trusted_Connection=True";
     builder.Services.AddInfrastructure(connectionString);
+    builder.Services.AddApplication();
+
+    // Development auth: persona switcher
+    builder.Services.AddScoped<PersonaHolder>();
+    builder.Services.AddScoped<ICurrentUser>(sp =>
+        sp.GetRequiredService<PersonaHolder>().Get());
 
     var app = builder.Build();
 
@@ -32,6 +43,7 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseMiddleware<PersonaMiddleware>();
     app.UseAntiforgery();
 
     app.MapStaticAssets();

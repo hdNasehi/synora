@@ -35,7 +35,7 @@ public static class DevelopmentSeeder
         await db.SaveChangesAsync();
     }
 
-    private static readonly Dictionary<string, Guid> Ids = new()
+    public static readonly Dictionary<string, Guid> SeedIds = new()
     {
         ["e01"] = Guid.Parse("00000000-0000-0000-0000-000000000001"),
         ["e02"] = Guid.Parse("00000000-0000-0000-0000-000000000002"),
@@ -56,7 +56,7 @@ public static class DevelopmentSeeder
         ["e17"] = Guid.Parse("00000000-0000-0000-0000-000000000011"),
     };
 
-    private static EmployeeId EmpId(string key) => new(Ids[key]);
+    private static EmployeeId EmpId(string key) => new(SeedIds[key]);
 
     private static readonly Guid DeptOperations = Guid.Parse("10000000-0000-0000-0000-000000000001");
     private static readonly Guid DeptFinance = Guid.Parse("10000000-0000-0000-0000-000000000002");
@@ -336,7 +336,7 @@ public static class DevelopmentSeeder
 
     private static void SeedScheduleAssignments(OrangeDbContext db)
     {
-        foreach (var key in Ids.Keys)
+        foreach (var key in SeedIds.Keys)
         {
             var schedId = key switch
             {
@@ -362,7 +362,7 @@ public static class DevelopmentSeeder
 
     private static void SeedPolicyAssignments(OrangeDbContext db)
     {
-        foreach (var key in Ids.Keys)
+        foreach (var key in SeedIds.Keys)
         {
             var polId = key == "e08" ? "pol-pt" : "pol-std";
             db.PolicyAssignments.Add(new PolicyAssignment
