@@ -1,4 +1,4 @@
-# Synora — Leave Management System
+# Orange — Leave Management System
 
 Internal employee leave management for a company with offices in the Netherlands (sample company: Noordkade B.V.). Four roles: Employee, Supervisor, Manager, HR admin. UI in English and Persian (RTL), dates in Gregorian or Solar Hijri.
 
@@ -27,14 +27,14 @@ Read these before any non-trivial change:
 
 ```
 src/
-  Synora.Domain/          pure C#: entities, value objects, domain services. No EF, no ASP.NET references.
-  Synora.Application/     use cases by feature folder (command/query + handler + validator), interfaces for infrastructure
-  Synora.Infrastructure/  EF Core DbContext + configurations + migrations, Graph (Teams), email, outbox processor
-  Synora.Web/             Blazor app, MudBlazor, auth, localisation, DI composition root
+  Orange.Domain/          pure C#: entities, value objects, domain services. No EF, no ASP.NET references.
+  Orange.Application/     use cases by feature folder (command/query + handler + validator), interfaces for infrastructure
+  Orange.Infrastructure/  EF Core DbContext + configurations + migrations, Graph (Teams), email, outbox processor
+  Orange.Web/             Blazor app, MudBlazor, auth, localisation, DI composition root
 tests/
-  Synora.Domain.Tests/
-  Synora.Application.Tests/
-  Synora.IntegrationTests/
+  Orange.Domain.Tests/
+  Orange.Application.Tests/
+  Orange.IntegrationTests/
 ```
 
 Dependency direction: Web → Application → Domain; Infrastructure → Application/Domain. Domain depends on nothing.
@@ -44,9 +44,9 @@ Dependency direction: Web → Application → Domain; Infrastructure → Applica
 ```bash
 dotnet build
 dotnet test
-dotnet run --project src/Synora.Web
-dotnet ef migrations add <Name> -p src/Synora.Infrastructure -s src/Synora.Web
-dotnet ef database update -p src/Synora.Infrastructure -s src/Synora.Web
+dotnet run --project src/Orange.Web
+dotnet ef migrations add <Name> -p src/Orange.Infrastructure -s src/Orange.Web
+dotnet ef database update -p src/Orange.Infrastructure -s src/Orange.Web
 ```
 
 ## Non-negotiable rules

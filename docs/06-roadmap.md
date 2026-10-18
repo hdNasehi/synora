@@ -12,7 +12,7 @@ Work in order. Each milestone ends green: `dotnet build` and `dotnet test` pass.
 > Implement LeaveRequest aggregate with status state machine, ApprovalRouteBuilder (any/all/sequential/none + final manager, sick = notify), approve/reject/cancel with substitutes, and BalanceCalculator. Port from engine.js (`buildSteps`, `decide`, `statusOf`, `balance`, `availability`). Add all test cases from docs/03 including the Sanne balance check (9.5 → 6.5).
 
 ## M4 — Persistence + seed
-> Add SynoraDbContext with configurations for all aggregates (rowversion on LeaveRequest, calculation snapshot as JSON), audit log and outbox tables, initial migration, and a development seeder that loads the sample data from reference/prototype/data.js (employees, teams, schedules, holidays 2026–2027, policies, adjustments, requests). Integration tests with Testcontainers for SQL Server.
+> Add OrangeDbContext with configurations for all aggregates (rowversion on LeaveRequest, calculation snapshot as JSON), audit log and outbox tables, initial migration, and a development seeder that loads the sample data from reference/prototype/data.js (employees, teams, schedules, holidays 2026–2027, policies, adjustments, requests). Integration tests with Testcontainers for SQL Server.
 
 ## M5 — Application use cases + auth
 > Implement use cases in Application by feature folder: SubmitLeaveRequest, SaveDraft, PreviewCalculation, CancelRequest, ApproveRequest, RejectRequest, GetMyRequests, GetRequestDetails, GetInbox, GetFinalApprovals, GetTeamCalendar (sick privacy). FluentValidation, Result<T>, audit entries, domain events → outbox. Development auth: a persona switcher (Sanne/Daan/Eva/Lotte) like the prototype; production: Entra ID. Resource-based authorization handlers.

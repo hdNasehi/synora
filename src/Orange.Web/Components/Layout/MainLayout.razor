@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <img src="orange-logo.webp" alt="Orange" style="height: 32px" class="me-2" />
+        <MudText Typo="Typo.h6">Orange</MudText>
+        <MudSpacer />
+    </MudAppBar>
+    <MudMainContent Class="pa-4">
+        @Body
+    </MudMainContent>
+</MudLayout>

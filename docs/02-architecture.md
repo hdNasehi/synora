@@ -5,7 +5,7 @@
 ## Projects
 
 ```
-src/Synora.Domain
+src/Orange.Domain
   Common/            Entity, AggregateRoot, ValueObject, Result, DomainEvent, strongly-typed IDs
   Employees/         Employee, Team, Department, Assignment (supervisors, rule, manager; ValidFrom/ValidTo),
                      ScheduleAssignment, PolicyAssignment, Role
@@ -14,7 +14,7 @@ src/Synora.Domain
   Calendars/         WorkSchedule (+ WorkDay per weekday), Holiday, HolidayGroup, HolidayObservance
   Balances/          LeavePolicy, BalanceAdjustment (kind: CarryOver | Adjustment), LeaveBalance (computed VO)
   Services/          WorkingDayCalculator, ApprovalRouteBuilder, BalanceCalculator, AvailabilityChecker
-src/Synora.Application
+src/Orange.Application
   Abstractions/      IAppDbContext (or repositories), ICurrentUser, IAuditLog, IOutbox, INotificationSender
   Requests/          Submit, SaveDraft, Cancel, Approve, Reject, GetMyRequests, GetRequestDetails, PreviewCalculation
   Approvals/         GetInbox, GetFinalApprovals
@@ -24,13 +24,13 @@ src/Synora.Application
   Calendars/         Schedules CRUD, Holidays CRUD, SetObservance
   Reports/           Balances, Requests, ByDepartment, AuditLog
   Calendar/          TeamCalendar query (respects sick-leave privacy)
-src/Synora.Infrastructure
-  Persistence/       SynoraDbContext, Configurations/, Migrations/, Seed/ (from reference/prototype/data.js)
+src/Orange.Infrastructure
+  Persistence/       OrangeDbContext, Configurations/, Migrations/, Seed/ (from reference/prototype/data.js)
   Audit/             AuditLog writer (same transaction via SaveChanges interceptor or explicit)
   Outbox/            OutboxMessage table + OutboxProcessor (BackgroundService)
   Teams/             GraphShiftsClient, TimeOffSyncHandler
   Notifications/     Email sender
-src/Synora.Web
+src/Orange.Web
   Components/Layout/ MainLayout (sidebar by role, top bar, locale switch, RTL provider)
   Components/Pages/  one folder per screen (Dashboard, RequestLeave, MyRequests, Inbox, FinalApprovals,
                      ManagerOverview, TeamCalendar, Employees, Workflows, Policies, Reports, Access)

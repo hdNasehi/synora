@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" />
+    <PackageReference Include="Serilog.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Orange.Application\Orange.Application.csproj" />
+    <ProjectReference Include="..\Orange.Infrastructure\Orange.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

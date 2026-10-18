@@ -1,6 +1,6 @@
-# Synora — Leave Management System
+# Orange — Leave Management System
 
-Starter pack for building Synora in .NET with Claude Code.
+Starter pack for building Orange in .NET with Claude Code.
 
 ## What's here
 
