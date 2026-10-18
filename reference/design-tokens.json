@@ -1,0 +1,544 @@
+{
+ "name": "Synora",
+ "version": 1,
+ "color": {
+  "themes": [
+   {
+    "id": "light",
+    "name": "Light"
+   },
+   {
+    "id": "dark",
+    "name": "Dark"
+   }
+  ],
+  "tokens": [
+   {
+    "name": "canvas",
+    "value": {
+     "light": "#f4f5f7",
+     "dark": "#101317"
+    },
+    "usage": "Page background behind cards, sidebar and tables."
+   },
+   {
+    "name": "surface",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#181c22"
+    },
+    "usage": "Cards, tables, dialogs, drawers, the top bar."
+   },
+   {
+    "name": "surface-sunken",
+    "value": {
+     "light": "#eef0f3",
+     "dark": "#0c0f12"
+    },
+    "usage": "Table headers, inactive tabs track, read-only fields, calendar rest-day columns."
+   },
+   {
+    "name": "surface-hover",
+    "value": {
+     "light": "#f1f4f8",
+     "dark": "#20262e"
+    },
+    "usage": "Row and menu-item hover on surface."
+   },
+   {
+    "name": "surface-selected",
+    "value": {
+     "light": "#e7eef8",
+     "dark": "#1c2a3d"
+    },
+    "usage": "Selected row, active navigation item."
+   },
+   {
+    "name": "sidebar",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#14181d"
+    },
+    "usage": "Left navigation background."
+   },
+   {
+    "name": "border",
+    "value": {
+     "light": "#e0e4ea",
+     "dark": "#2a313a"
+    },
+    "usage": "Hairline dividers and card borders (decorative, not meaning-bearing)."
+   },
+   {
+    "name": "border-control",
+    "value": {
+     "light": "#8a94a3",
+     "dark": "#6b7684"
+    },
+    "usage": "Input, select and checkbox borders — 3:1 on surface in both themes."
+   },
+   {
+    "name": "ink",
+    "value": {
+     "light": "#161b22",
+     "dark": "#e9ecf0"
+    },
+    "usage": "Primary text on canvas, surface and surface-sunken."
+   },
+   {
+    "name": "ink-muted",
+    "value": {
+     "light": "#566170",
+     "dark": "#a2acb8"
+    },
+    "usage": "Secondary text, table meta, helper text on canvas and surface."
+   },
+   {
+    "name": "ink-disabled",
+    "value": {
+     "light": "#9aa3ae",
+     "dark": "#5d6773"
+    },
+    "usage": "Disabled labels only (exempt from contrast)."
+   },
+   {
+    "name": "primary",
+    "value": {
+     "light": "#1d4f91",
+     "dark": "#86b0ea"
+    },
+    "usage": "Delft blue. Primary buttons, links, focus, selected nav marker, annual leave on calendars."
+   },
+   {
+    "name": "primary-hover",
+    "value": {
+     "light": "#163d72",
+     "dark": "#a3c3f0"
+    },
+    "usage": "Hover state of primary buttons and links."
+   },
+   {
+    "name": "on-primary",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#0b1a2e"
+    },
+    "usage": "Text and icons on primary fills."
+   },
+   {
+    "name": "primary-soft",
+    "value": {
+     "light": "#e8eff9",
+     "dark": "#1a2a40"
+    },
+    "usage": "Selected chips, info banners, today column."
+   },
+   {
+    "name": "primary-ink",
+    "value": {
+     "light": "#1a4682",
+     "dark": "#a9c6f0"
+    },
+    "usage": "Text on primary-soft."
+   },
+   {
+    "name": "accent",
+    "value": {
+     "light": "#c2410c",
+     "dark": "#f2925a"
+    },
+    "usage": "Dutch orange. The ‘today’ marker and public-holiday markers only."
+   },
+   {
+    "name": "accent-soft",
+    "value": {
+     "light": "#fdeee4",
+     "dark": "#3a2416"
+    },
+    "usage": "Public-holiday column fill on calendars."
+   },
+   {
+    "name": "accent-ink",
+    "value": {
+     "light": "#9a330a",
+     "dark": "#f6ad80"
+    },
+    "usage": "Text on accent-soft (holiday names)."
+   },
+   {
+    "name": "company-soft",
+    "value": {
+     "light": "#e1f2ef",
+     "dark": "#11302c"
+    },
+    "usage": "Company-holiday column fill on calendars."
+   },
+   {
+    "name": "company-ink",
+    "value": {
+     "light": "#0d5c54",
+     "dark": "#74d3c7"
+    },
+    "usage": "Text and marks on company-soft."
+   },
+   {
+    "name": "success",
+    "value": {
+     "light": "#1d7a45",
+     "dark": "#5cc68a"
+    },
+    "usage": "Approved: icons, timeline dots, progress."
+   },
+   {
+    "name": "success-soft",
+    "value": {
+     "light": "#e5f4eb",
+     "dark": "#12301f"
+    },
+    "usage": "Approved badge background."
+   },
+   {
+    "name": "success-ink",
+    "value": {
+     "light": "#15613a",
+     "dark": "#86dba9"
+    },
+    "usage": "Text on success-soft."
+   },
+   {
+    "name": "warning",
+    "value": {
+     "light": "#a35d00",
+     "dark": "#f0b44c"
+    },
+    "usage": "Pending: icons, timeline dots, SLA flags."
+   },
+   {
+    "name": "warning-soft",
+    "value": {
+     "light": "#fdf2df",
+     "dark": "#352710"
+    },
+    "usage": "Pending badge background, availability warnings."
+   },
+   {
+    "name": "warning-ink",
+    "value": {
+     "light": "#7d4700",
+     "dark": "#f6c97a"
+    },
+    "usage": "Text on warning-soft."
+   },
+   {
+    "name": "danger",
+    "value": {
+     "light": "#b42318",
+     "dark": "#f47c70"
+    },
+    "usage": "Rejected, validation errors, destructive buttons."
+   },
+   {
+    "name": "danger-soft",
+    "value": {
+     "light": "#fdeceb",
+     "dark": "#3b1714"
+    },
+    "usage": "Rejected badge background, error banners."
+   },
+   {
+    "name": "danger-ink",
+    "value": {
+     "light": "#931c13",
+     "dark": "#f9a39a"
+    },
+    "usage": "Text on danger-soft."
+   },
+   {
+    "name": "on-danger",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#2a0b08"
+    },
+    "usage": "Text on danger fills."
+   },
+   {
+    "name": "neutral-soft",
+    "value": {
+     "light": "#eceef2",
+     "dark": "#262c34"
+    },
+    "usage": "Cancelled, inactive and draft badge background."
+   },
+   {
+    "name": "neutral-ink",
+    "value": {
+     "light": "#4a5361",
+     "dark": "#b4bcc7"
+    },
+    "usage": "Text on neutral-soft."
+   },
+   {
+    "name": "cal-annual",
+    "value": {
+     "light": "#2f63a8",
+     "dark": "#6f9fe0"
+    },
+    "usage": "Calendar bar: annual leave."
+   },
+   {
+    "name": "cal-unpaid",
+    "value": {
+     "light": "#5b6575",
+     "dark": "#8f99a8"
+    },
+    "usage": "Calendar bar: unpaid leave."
+   },
+   {
+    "name": "cal-absent",
+    "value": {
+     "light": "#a3486b",
+     "dark": "#e08aab"
+    },
+    "usage": "Calendar bar: sick leave (shown as ‘Absent’ to peers)."
+   },
+   {
+    "name": "on-cal",
+    "value": {
+     "light": "#ffffff",
+     "dark": "#0d1117"
+    },
+    "usage": "Text on calendar bars."
+   },
+   {
+    "name": "overlay",
+    "value": {
+     "light": "rgba(14,18,24,0.48)",
+     "dark": "rgba(0,0,0,0.6)"
+    },
+    "usage": "Scrim behind dialogs and drawers."
+   }
+  ]
+ },
+ "type": {
+  "fonts": [],
+  "families": {
+   "sans": "\"IBM Plex Sans\", \"Segoe UI\", system-ui, sans-serif",
+   "mono": "\"IBM Plex Mono\", ui-monospace, Consolas, monospace"
+  },
+  "groups": [
+   {
+    "name": "Display",
+    "family": "sans",
+    "styles": [
+     {
+      "name": "page-title",
+      "fontSize": "24px",
+      "lineHeight": "32px",
+      "fontWeight": 600,
+      "letterSpacing": "-0.01em",
+      "sample": "Good morning, Sanne",
+      "usage": "One per screen: the page heading."
+     },
+     {
+      "name": "figure",
+      "fontSize": "32px",
+      "lineHeight": "36px",
+      "fontWeight": 600,
+      "letterSpacing": "-0.02em",
+      "sample": "9.5 days",
+      "usage": "Balance figures and KPI numbers (tabular numerals)."
+     }
+    ]
+   },
+   {
+    "name": "Text",
+    "family": "sans",
+    "styles": [
+     {
+      "name": "section-title",
+      "fontSize": "16px",
+      "lineHeight": "24px",
+      "fontWeight": 600,
+      "sample": "Pending requests",
+      "usage": "Card and section headings."
+     },
+     {
+      "name": "body",
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": 400,
+      "sample": "Your request goes to Daan Bakker and Priya Raman.",
+      "usage": "Default UI and table text."
+     },
+     {
+      "name": "body-strong",
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": 600,
+      "sample": "Thu 12 Nov – Mon 16 Nov 2026",
+      "usage": "Names, dates and values that anchor a row."
+     },
+     {
+      "name": "small",
+      "fontSize": "13px",
+      "lineHeight": "18px",
+      "fontWeight": 400,
+      "sample": "Submitted 15 Oct, 09:31",
+      "usage": "Meta lines, helper text, timeline detail."
+     },
+     {
+      "name": "caption",
+      "fontSize": "12px",
+      "lineHeight": "16px",
+      "fontWeight": 500,
+      "sample": "Approved",
+      "usage": "Badges, table headers, legends."
+     },
+     {
+      "name": "overline",
+      "fontSize": "11px",
+      "lineHeight": "16px",
+      "fontWeight": 600,
+      "letterSpacing": "0.06em",
+      "sample": "APPROVALS",
+      "usage": "Sidebar group labels, uppercase."
+     }
+    ]
+   },
+   {
+    "name": "Data",
+    "family": "mono",
+    "styles": [
+     {
+      "name": "code",
+      "fontSize": "12px",
+      "lineHeight": "16px",
+      "fontWeight": 500,
+      "sample": "LR-2026-0412",
+      "usage": "Request IDs, employee numbers, audit references."
+     }
+    ]
+   }
+  ]
+ },
+ "spacing": {
+  "tokens": [
+   {
+    "name": "space-1",
+    "value": "4px",
+    "usage": "Icon–label gap inside badges."
+   },
+   {
+    "name": "space-2",
+    "value": "8px",
+    "usage": "Gap between related controls; button icon gap."
+   },
+   {
+    "name": "space-3",
+    "value": "12px",
+    "usage": "Table cell vertical padding; form field label gap."
+   },
+   {
+    "name": "space-4",
+    "value": "16px",
+    "usage": "Card inner padding (compact); gap between cards in a row; mobile gutter."
+   },
+   {
+    "name": "space-5",
+    "value": "20px",
+    "usage": "Card inner padding (default)."
+   },
+   {
+    "name": "space-6",
+    "value": "24px",
+    "usage": "Page padding; gap between page sections."
+   },
+   {
+    "name": "space-8",
+    "value": "32px",
+    "usage": "Gap between major page regions; empty-state padding."
+   }
+  ]
+ },
+ "radius": {
+  "tokens": [
+   {
+    "name": "radius-sm",
+    "value": "4px",
+    "usage": "Badges, calendar bars, checkboxes."
+   },
+   {
+    "name": "radius-md",
+    "value": "6px",
+    "usage": "Buttons, inputs, menus."
+   },
+   {
+    "name": "radius-lg",
+    "value": "10px",
+    "usage": "Cards, dialogs, drawers."
+   },
+   {
+    "name": "radius-pill",
+    "value": "999px",
+    "usage": "Avatars, count pills, toggles."
+   }
+  ]
+ },
+ "shadow": {
+  "tokens": [
+   {
+    "name": "shadow-sm",
+    "value": {
+     "light": "0 1px 2px rgba(16,24,40,0.06)",
+     "dark": "0 1px 2px rgba(0,0,0,0.4)"
+    },
+    "usage": "Cards at rest (with border)."
+   },
+   {
+    "name": "shadow-md",
+    "value": {
+     "light": "0 6px 16px rgba(16,24,40,0.10)",
+     "dark": "0 6px 16px rgba(0,0,0,0.5)"
+    },
+    "usage": "Menus, popovers, date picker."
+   },
+   {
+    "name": "shadow-lg",
+    "value": {
+     "light": "0 20px 48px rgba(16,24,40,0.20)",
+     "dark": "0 20px 48px rgba(0,0,0,0.6)"
+    },
+    "usage": "Dialogs and drawers."
+   }
+  ]
+ },
+ "size": {
+  "tokens": [
+   {
+    "name": "sidebar-width",
+    "value": "240px",
+    "usage": "Left navigation width on desktop."
+   },
+   {
+    "name": "topbar-height",
+    "value": "56px",
+    "usage": "Top bar height."
+   },
+   {
+    "name": "control-height",
+    "value": "36px",
+    "usage": "Buttons, inputs, selects (32px in dense tables)."
+   },
+   {
+    "name": "row-height",
+    "value": "52px",
+    "usage": "Data table row height."
+   },
+   {
+    "name": "drawer-width",
+    "value": "520px",
+    "usage": "Request details drawer."
+   }
+  ]
+ }
+}
