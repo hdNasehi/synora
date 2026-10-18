@@ -9,6 +9,8 @@ public sealed class WorkSchedule : Entity<WorkScheduleId>
 
     private readonly List<WorkDay> _days = [];
     public IReadOnlyList<WorkDay> Days => _days.AsReadOnly();
+
+    public void AddDay(WorkDay day) => _days.Add(day);
 }
 
 public sealed record WorkDay(
