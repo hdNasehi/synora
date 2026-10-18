@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Orange.Domain.Tests" />
+    <InternalsVisibleTo Include="Orange.IntegrationTests" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 using MudBlazor.Services;
 using Serilog;
 using Orange.Infrastructure;
+using Orange.Infrastructure.Persistence.Seed;
 using Orange.Web.Components;
 
 Log.Logger = new LoggerConfiguration()
@@ -36,6 +37,9 @@ try
     app.MapStaticAssets();
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode();
+
+    if (app.Environment.IsDevelopment())
+        await DevelopmentSeeder.SeedAsync(app);
 
     app.Run();
 }
