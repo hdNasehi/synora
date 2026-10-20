@@ -1,0 +1,205 @@
+@page "/request"
+@inject Orange.Application.Requests.Submit.SubmitLeaveRequestHandler SubmitHandler
+@inject Orange.Application.Requests.Preview.PreviewCalculationHandler PreviewHandler
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<PageTitle>Request leave — Orange</PageTitle>
+
+<div class="d-flex align-center mb-4">
+    <MudText Typo="Typo.h5">Request leave</MudText>
+</div>
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4" Elevation="0"
+                  Style="border:1px solid var(--mud-palette-divider);border-radius:10px;">
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Details</MudText>
+
+            <MudSelect T="LeaveType" Label="Leave type" @bind-Value="_type"
+                       Variant="Variant.Outlined" Class="mb-3"
+                       AnchorOrigin="Origin.BottomLeft">
+                <MudSelectItem Value="LeaveType.Annual">Annual leave</MudSelectItem>
+                <MudSelectItem Value="LeaveType.Sick">Sick leave</MudSelectItem>
+                <MudSelectItem Value="LeaveType.Unpaid">Unpaid leave</MudSelectItem>
+            </MudSelect>
+
+            <MudDatePicker Label="Start date" @bind-Date="_startDate" @bind-Date:after="OnDatesChanged"
+                           Variant="Variant.Outlined" Class="mb-3"
+                           DateFormat="dd MMM yyyy" />
+
+            <MudDatePicker Label="End date" @bind-Date="_endDate" @bind-Date:after="OnDatesChanged"
+                           Variant="Variant.Outlined" Class="mb-3"
+                           DateFormat="dd MMM yyyy"
+                           MinDate="_startDate" />
+
+            <MudTextField @bind-Value="_reason" Label="Reason (optional)"
+                          Lines="3" Variant="Variant.Outlined" Class="mb-3"
+                          Counter="500" MaxLength="500" />
+
+            <MudCheckBox T="bool" @bind-Value="_reviewed" Class="mb-3">
+                I've reviewed the leave summary and confirm the request is correct
+            </MudCheckBox>
+
+            @if (!string.IsNullOrEmpty(_submitError))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-3">@_submitError</MudAlert>
+            }
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       FullWidth="true"
+                       Disabled="@(!CanSubmit || _submitting)"
+                       OnClick="SubmitAsync">
+                @if (_submitting)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                }
+                Submit request
+            </MudButton>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4" Elevation="0"
+                  Style="border:1px solid var(--mud-palette-divider);border-radius:10px;min-height:200px;">
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Summary</MudText>
+
+            @if (_previewLoading)
+            {
+                <MudSkeleton Height="20px" Class="mb-2" />
+                <MudSkeleton Height="20px" Width="70%" Class="mb-2" />
+                <MudSkeleton Height="20px" Width="50%" />
+            }
+            else if (_preview is null)
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Select dates to see the working-day breakdown.
+                </MudText>
+            }
+            else if (_previewError is not null)
+            {
+                <MudAlert Severity="Severity.Warning">@_previewError</MudAlert>
+            }
+            else
+            {
+                <div class="d-flex justify-space-between mb-2">
+                    <MudText Typo="Typo.body2">Working days</MudText>
+                    <MudText Typo="Typo.body2" Style="font-weight:600">@_preview.WorkingDays</MudText>
+                </div>
+
+                @if (_preview.Calculation.ExcludedRestDays.Count > 0)
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        @_preview.Calculation.ExcludedRestDays.Count rest day(s) excluded
+                    </MudText>
+                }
+                @if (_preview.Calculation.ExcludedHolidays.Count > 0)
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block mb-2">
+                        @_preview.Calculation.ExcludedHolidays.Count public holiday(s) excluded
+                    </MudText>
+                }
+
+                @if (_preview.Calculation.Days.Count > 0)
+                {
+                    <MudDivider Class="my-2" />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-1">Day breakdown</MudText>
+                    <div style="max-height:160px;overflow-y:auto;">
+                        @foreach (var day in _preview.Calculation.Days.Take(10))
+                        {
+                            <div class="d-flex justify-space-between">
+                                <MudText Typo="Typo.caption">@day.Date.ToString("ddd d MMM")</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @(day.Kind == LeaveDayKind.Work ? $"{day.Hours:0.#}h" : day.Kind.ToString())
+                                </MudText>
+                            </div>
+                        }
+                        @if (_preview.Calculation.Days.Count > 10)
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                …and @(_preview.Calculation.Days.Count - 10) more days
+                            </MudText>
+                        }
+                    </div>
+                }
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    LeaveType _type = LeaveType.Annual;
+    DateTime? _startDate;
+    DateTime? _endDate;
+    string _reason = "";
+    bool _reviewed;
+    bool _submitting;
+    bool _previewLoading;
+    string? _submitError;
+    string? _previewError;
+    Orange.Application.Requests.Preview.PreviewCalculationResponse? _preview;
+
+    bool CanSubmit => _startDate.HasValue && _endDate.HasValue
+                      && _endDate >= _startDate && _reviewed && !_previewLoading;
+
+    async Task OnDatesChanged()
+    {
+        if (_startDate.HasValue && _endDate.HasValue && _endDate >= _startDate)
+            await RefreshPreviewAsync();
+        else
+            _preview = null;
+    }
+
+    async Task RefreshPreviewAsync()
+    {
+        _previewLoading = true;
+        _previewError = null;
+        _preview = null;
+
+        try
+        {
+            var start = DateOnly.FromDateTime(_startDate!.Value);
+            var end   = DateOnly.FromDateTime(_endDate!.Value);
+            var result = await PreviewHandler.HandleAsync(new(start, end, null, null));
+            if (result.IsSuccess)
+                _preview = result.Value;
+            else
+                _previewError = result.Error.Message;
+        }
+        catch
+        {
+            _previewError = "Could not compute preview.";
+        }
+        finally
+        {
+            _previewLoading = false;
+        }
+    }
+
+    async Task SubmitAsync()
+    {
+        if (!CanSubmit) return;
+        _submitting = true;
+        _submitError = null;
+        try
+        {
+            var start = DateOnly.FromDateTime(_startDate!.Value);
+            var end   = DateOnly.FromDateTime(_endDate!.Value);
+            var result = await SubmitHandler.HandleAsync(new(
+                _type, start, end, null, null,
+                string.IsNullOrWhiteSpace(_reason) ? null : _reason));
+            if (result.IsSuccess)
+            {
+                Snackbar.Add("Leave request submitted.", Severity.Success);
+                Nav.NavigateTo("/my-requests");
+            }
+            else
+                _submitError = result.Error.Message;
+        }
+        catch (Exception ex)
+        {
+            _submitError = ex.Message;
+        }
+        finally { _submitting = false; }
+    }
+}

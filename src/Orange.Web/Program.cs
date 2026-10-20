@@ -44,6 +44,16 @@ try
 
     app.UseHttpsRedirection();
     app.UseMiddleware<PersonaMiddleware>();
+
+    // Development persona switcher — sets cookie then redirects
+    app.MapGet("/switch-persona/{key}", (string key, HttpResponse response) =>
+    {
+        if (PersonaSwitcherCurrentUser.Available.ContainsKey(key))
+            response.Cookies.Append("orange-persona", key,
+                new CookieOptions { Path = "/", SameSite = SameSiteMode.Lax });
+        return Results.Redirect("/");
+    });
+
     app.UseAntiforgery();
 
     app.MapStaticAssets();

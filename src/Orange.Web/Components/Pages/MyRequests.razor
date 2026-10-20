@@ -1,0 +1,102 @@
+@page "/my-requests"
+@page "/my-requests/{RequestIdParam}"
+
+<PageTitle>My requests — Orange</PageTitle>
+
+<div class="d-flex align-center justify-space-between mb-4">
+    <MudText Typo="Typo.h5">My requests</MudText>
+    <div class="d-flex gap-2">
+        <MudSelect T="RequestStatus?" Label="Status" @bind-Value="_statusFilter" @bind-Value:after="LoadAsync"
+                   Variant="Variant.Outlined" Style="min-width:160px;"
+                   AnchorOrigin="Origin.BottomLeft">
+            <MudSelectItem T="RequestStatus?" Value="null">All statuses</MudSelectItem>
+            <MudSelectItem T="RequestStatus?" Value="RequestStatus.PendingSupervisor">Pending</MudSelectItem>
+            <MudSelectItem T="RequestStatus?" Value="RequestStatus.Approved">Approved</MudSelectItem>
+            <MudSelectItem T="RequestStatus?" Value="RequestStatus.Rejected">Rejected</MudSelectItem>
+            <MudSelectItem T="RequestStatus?" Value="RequestStatus.Cancelled">Cancelled</MudSelectItem>
+        </MudSelect>
+        <MudSelect T="int?" Label="Year" @bind-Value="_yearFilter" @bind-Value:after="LoadAsync"
+                   Variant="Variant.Outlined" Style="min-width:110px;"
+                   AnchorOrigin="Origin.BottomLeft">
+            <MudSelectItem T="int?" Value="null">All years</MudSelectItem>
+            @for (int y = DateTime.Today.Year + 1; y >= DateTime.Today.Year - 2; y--)
+            {
+                var yr = y;
+                <MudSelectItem T="int?" Value="yr">@yr</MudSelectItem>
+            }
+        </MudSelect>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/request">New request</MudButton>
+    </div>
+</div>
+
+@if (_loading)
+{
+    @for (int i = 0; i < 5; i++)
+    {
+        <MudSkeleton Height="52px" Class="mb-1" />
+    }
+}
+else if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">
+        @_error
+        <MudButton OnClick="LoadAsync" Variant="Variant.Text" Color="Color.Error">Retry</MudButton>
+    </MudAlert>
+}
+else if (_items.Count == 0)
+{
+    <MudPaper Class="pa-6 text-center" Elevation="0"
+              Style="border:1px dashed var(--mud-palette-divider);border-radius:10px;">
+        <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Large" Color="Color.Secondary" />
+        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">No leave requests found.</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/request" Class="mt-3">
+            Request leave
+        </MudButton>
+    </MudPaper>
+}
+else
+{
+    <MudDataGrid T="Orange.Application.Requests.GetMyRequests.LeaveRequestSummary"
+                 Items="_items" Hover="true" Dense="true"
+                 RowClick="@(e => OpenDrawer(e.Item.Id))">
+        <Columns>
+            <TemplateColumn Title="Type" SortBy="@(x => x.Type)">
+                <CellTemplate>
+                    <strong>@LeaveTypeLabel(context.Item.Type)</strong>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Start" SortBy="@(x => x.StartDate)">
+                <CellTemplate>
+                    @context.Item.StartDate.ToString("d MMM yyyy")
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="End" SortBy="@(x => x.EndDate)">
+                <CellTemplate>
+                    @context.Item.EndDate.ToString("d MMM yyyy")
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Days" SortBy="@(x => x.Amount)">
+                <CellTemplate>
+                    @context.Item.Amount @context.Item.Unit.ToString().ToLower()
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Status">
+                <CellTemplate>
+                    <StatusBadge Status="context.Item.Status" />
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Submitted" SortBy="@(x => x.SubmittedAt)">
+                <CellTemplate>
+                    @context.Item.SubmittedAt.ToLocalTime().ToString("d MMM yyyy")
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="Orange.Application.Requests.GetMyRequests.LeaveRequestSummary" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+<RequestDrawer @ref="_drawer" />

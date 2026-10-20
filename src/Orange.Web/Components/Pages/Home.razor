@@ -1,6 +1,119 @@
-﻿@page "/"
+@page "/"
+@using Orange.Application.Balances.GetMyBalance
+@using Orange.Application.Requests.GetMyRequests
+@inject GetMyBalanceHandler BalanceHandler
+@inject GetMyRequestsHandler RequestsHandler
+@inject NavigationManager Nav
 
-<PageTitle>Orange</PageTitle>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+    @if (_loading)
+    {
+        <MudGrid>
+            <MudItem xs="12">
+                <MudSkeleton Height="120px" Class="rounded-lg" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudSkeleton Height="200px" Class="rounded-lg" />
+            </MudItem>
+        </MudGrid>
+    }
+    else
+    {
+        <MudStack Spacing="4">
+            @if (_balance is not null)
+            {
+                <MudPaper Class="pa-5" Elevation="1">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
+                        <MudText Typo="Typo.h6">Leave balance @DateTime.Today.Year</MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                   OnClick="@(() => Nav.NavigateTo("/request-leave"))">
+                            Request leave
+                        </MudButton>
+                    </MudStack>
+                    <MudGrid>
+                        <MudItem xs="6" sm="3">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Entitlement</MudText>
+                            <MudText Typo="Typo.h5">@_balance.Balance.Entitlement <span style="font-size:.7em;color:var(--mud-palette-text-secondary)">@_balance.Balance.Unit.ToString().ToLower()</span></MudText>
+                        </MudItem>
+                        <MudItem xs="6" sm="3">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Taken</MudText>
+                            <MudText Typo="Typo.h5">@_balance.Balance.Taken <span style="font-size:.7em;color:var(--mud-palette-text-secondary)">@_balance.Balance.Unit.ToString().ToLower()</span></MudText>
+                        </MudItem>
+                        <MudItem xs="6" sm="3">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Pending</MudText>
+                            <MudText Typo="Typo.h5">@_balance.Balance.Pending <span style="font-size:.7em;color:var(--mud-palette-text-secondary)">@_balance.Balance.Unit.ToString().ToLower()</span></MudText>
+                        </MudItem>
+                        <MudItem xs="6" sm="3">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Available</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success">@_balance.Balance.Available <span style="font-size:.7em">@_balance.Balance.Unit.ToString().ToLower()</span></MudText>
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            }
 
-<MudText Typo="Typo.h4" Class="mb-4">Welcome to Orange</MudText>
-<MudText Typo="Typo.body1">Leave management system — skeleton ready.</MudText>
+            <MudPaper Class="pa-5" Elevation="1">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
+                    <MudText Typo="Typo.h6">Recent requests</MudText>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary"
+                               OnClick="@(() => Nav.NavigateTo("/my-requests"))">
+                        View all
+                    </MudButton>
+                </MudStack>
+                @if (_requests.Count == 0)
+                {
+                    <MudText Color="Color.Secondary">No leave requests yet.</MudText>
+                }
+                else
+                {
+                    <MudList T="LeaveRequestSummary" Dense="true">
+                        @foreach (var r in _requests)
+                        {
+                            var req = r;
+                            <MudListItem T="LeaveRequestSummary" OnClick="@(() => Nav.NavigateTo($"/my-requests/{req.Id.Value}"))">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                    <div>
+                                        <MudText Typo="Typo.body2">@LeaveTypeLabel(req.Type)</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            @req.StartDate.ToString("d MMM") – @req.EndDate.ToString("d MMM yyyy") · @req.Amount @req.Unit.ToString().ToLower()
+                                        </MudText>
+                                    </div>
+                                    <StatusBadge Status="req.Status" />
+                                </MudStack>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+            </MudPaper>
+        </MudStack>
+    }
+</MudContainer>
+
+@code {
+    bool _loading = true;
+    GetMyBalanceResponse? _balance;
+    List<LeaveRequestSummary> _requests = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try
+        {
+            var year = DateTime.Today.Year;
+            var balanceTask = BalanceHandler.HandleAsync(new(year));
+            var requestsTask = RequestsHandler.HandleAsync(new(Page: 1, PageSize: 5));
+            await Task.WhenAll(balanceTask, requestsTask);
+            _balance = await balanceTask;
+            var requestsResult = await requestsTask;
+            _requests = requestsResult.Items.ToList();
+        }
+        finally { _loading = false; }
+    }
+
+    static string LeaveTypeLabel(LeaveType t) => t switch
+    {
+        LeaveType.Annual => "Annual leave",
+        LeaveType.Sick   => "Sick leave",
+        LeaveType.Unpaid => "Unpaid leave",
+        _                => t.ToString(),
+    };
+}

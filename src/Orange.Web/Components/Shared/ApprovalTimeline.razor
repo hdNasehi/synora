@@ -1,0 +1,77 @@
+@using Orange.Application.Requests.GetDetails
+
+@if (Steps is null || Steps.Count == 0)
+{
+    <MudText Typo="Typo.body2" Color="Color.Secondary">No approval steps.</MudText>
+}
+else
+{
+    <MudTimeline TimelinePosition="TimelinePosition.Start">
+        @foreach (var step in Steps.OrderBy(s => s.Order))
+        {
+            var (dotColor, dotIcon) = StepAppearance(step.State);
+            var isFinal = step.Kind == StepKind.Manager;
+            <MudTimelineItem Color="@dotColor" Variant="Variant.Filled" Size="Size.Small">
+                <ItemContent>
+                    <div class="d-flex align-center gap-2 mb-1">
+                        <MudText Typo="Typo.body2" Style="font-weight:500">
+                            @(isFinal ? "Final approval" : step.Kind.ToString())
+                        </MudText>
+                        @if (isFinal)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary"
+                                     Style="font-size:0.7rem;height:18px;">Final step</MudChip>
+                        }
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="ms-auto">
+                            @StepStateLabel(step.State)
+                        </MudText>
+                    </div>
+                    @foreach (var d in step.Decisions)
+                    {
+                        <div class="d-flex align-center gap-1 mb-1">
+                            <MudIcon Icon="@(d.Decision == DecisionType.Approved ? Icons.Material.Filled.ThumbUp : Icons.Material.Filled.ThumbDown)"
+                                     Size="Size.Small"
+                                     Color="@(d.Decision == DecisionType.Approved ? Color.Success : Color.Error)" />
+                            <MudText Typo="Typo.caption">
+                                @d.DecidedBy.Value.ToString("N")[..8]…
+                                @if (d.OnBehalfOf.HasValue)
+                                {
+                                    <span> on behalf of @d.OnBehalfOf.Value.Value.ToString("N")[..8]…</span>
+                                }
+                                — @d.DecidedAt.ToLocalTime().ToString("d MMM HH:mm")
+                            </MudText>
+                        </div>
+                        @if (!string.IsNullOrEmpty(d.Comment))
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Secondary"
+                                     Class="ms-4 fst-italic">"@d.Comment"</MudText>
+                        }
+                    }
+                </ItemContent>
+            </MudTimelineItem>
+        }
+    </MudTimeline>
+}
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<ApprovalStepDetail>? Steps { get; set; }
+
+    static (Color color, string icon) StepAppearance(StepState state) => state switch
+    {
+        StepState.Done     => (Color.Success, Icons.Material.Filled.CheckCircle),
+        StepState.Active   => (Color.Primary, Icons.Material.Filled.HourglassTop),
+        StepState.Rejected => (Color.Error,   Icons.Material.Filled.Cancel),
+        StepState.Skipped  => (Color.Default, Icons.Material.Filled.SkipNext),
+        _                  => (Color.Default, Icons.Material.Filled.Circle),
+    };
+
+    static string StepStateLabel(StepState state) => state switch
+    {
+        StepState.Done     => "Done",
+        StepState.Active   => "Awaiting",
+        StepState.Rejected => "Rejected",
+        StepState.Skipped  => "Skipped",
+        StepState.Waiting  => "Waiting",
+        _                  => state.ToString(),
+    };
+}

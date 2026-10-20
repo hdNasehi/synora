@@ -1,0 +1,27 @@
+@* Status chip: icon + word, never colour alone *@
+<MudChip T="string" Color="_color" Icon="_icon" Size="Size.Small"
+         Style="font-size:0.75rem;font-weight:500;height:24px;">
+    @_label
+</MudChip>
+
+@code {
+    [Parameter, EditorRequired] public RequestStatus Status { get; set; }
+
+    string _label = "";
+    Color _color = Color.Default;
+    string _icon = Icons.Material.Filled.Circle;
+
+    protected override void OnParametersSet()
+    {
+        (_label, _color, _icon) = Status switch
+        {
+            RequestStatus.Draft           => ("Draft",              Color.Default,  Icons.Material.Filled.EditNote),
+            RequestStatus.PendingSupervisor => ("Pending",          Color.Warning,  Icons.Material.Filled.HourglassTop),
+            RequestStatus.PendingManager  => ("Pending manager",    Color.Warning,  Icons.Material.Filled.HourglassTop),
+            RequestStatus.Approved        => ("Approved",           Color.Success,  Icons.Material.Filled.CheckCircle),
+            RequestStatus.Rejected        => ("Rejected",           Color.Error,    Icons.Material.Filled.Cancel),
+            RequestStatus.Cancelled       => ("Cancelled",          Color.Default,  Icons.Material.Filled.RemoveCircle),
+            _                             => (Status.ToString(),    Color.Default,  Icons.Material.Filled.Circle),
+        };
+    }
+}

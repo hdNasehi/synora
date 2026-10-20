@@ -1,0 +1,13 @@
+<div class="d-flex justify-space-between">
+    <MudText Typo="Typo.body2" Color="@(Muted ? Color.Secondary : Color.Default)">@Label</MudText>
+    <MudText Typo="Typo.body2" Color="@(Muted ? Color.Secondary : Color.Default)">
+        @Value @Unit.ToString().ToLower()
+    </MudText>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter, EditorRequired] public decimal Value { get; set; }
+    [Parameter] public BalanceUnit Unit { get; set; }
+    [Parameter] public bool Muted { get; set; }
+}

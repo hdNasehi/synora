@@ -1,0 +1,86 @@
+@page "/manager"
+
+<PageTitle>Team overview — Orange</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-4">Team overview</MudText>
+
+@if (_loading)
+{
+    <MudGrid>
+        <MudItem xs="12" md="6"><MudSkeleton Height="120px" /></MudItem>
+        <MudItem xs="12" md="6"><MudSkeleton Height="120px" /></MudItem>
+    </MudGrid>
+}
+else
+{
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="0"
+                      Style="border:1px solid var(--mud-palette-divider);border-radius:10px;">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Pending supervisor</MudText>
+                <MudText Typo="Typo.h4" Style="font-weight:700;color:var(--mud-palette-warning)">
+                    @_inboxCount
+                </MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="0"
+                      Style="border:1px solid var(--mud-palette-divider);border-radius:10px;">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Pending final approval</MudText>
+                <MudText Typo="Typo.h4" Style="font-weight:700;color:var(--mud-palette-warning)">
+                    @_finalCount
+                </MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.subtitle1" Class="mb-2">Requests awaiting final approval</MudText>
+
+    @if (_finalItems.Count == 0)
+    {
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+            No requests currently awaiting final approval.
+        </MudText>
+    }
+    else
+    {
+        <MudDataGrid T="Orange.Application.Approvals.GetFinalApprovals.FinalApprovalItem"
+                     Items="_finalItems" Hover="true" Dense="true"
+                     RowClick="@(e => OpenDrawer(e.Item.Id))"
+                     Class="mb-4">
+            <Columns>
+                <TemplateColumn Title="Employee" SortBy="@(x => x.EmployeeName)">
+                    <CellTemplate>
+                        <strong>@context.Item.EmployeeName</strong>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Type" SortBy="@(x => x.Type)">
+                    <CellTemplate>
+                        @LeaveTypeLabel(context.Item.Type)
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Start" SortBy="@(x => x.StartDate)">
+                    <CellTemplate>
+                        @context.Item.StartDate.ToString("d MMM yyyy")
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="End" SortBy="@(x => x.EndDate)">
+                    <CellTemplate>
+                        @context.Item.EndDate.ToString("d MMM yyyy")
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Days" SortBy="@(x => x.Amount)">
+                    <CellTemplate>
+                        @context.Item.Amount @context.Item.Unit.ToString().ToLower()
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    }
+
+    <MudAlert Severity="Severity.Info">
+        Full team calendar view is planned for M7 (HR admin + reports).
+    </MudAlert>
+}
+
+<RequestDrawer @ref="_drawer" />

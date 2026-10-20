@@ -1,0 +1,36 @@
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Approve request</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">
+            Approve the leave request for <strong>@EmployeeName</strong>?
+        </MudText>
+        <MudTextField @bind-Value="_comment" Label="Comment (optional)"
+                      Lines="3" Variant="Variant.Outlined" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Filled"
+                   OnClick="Confirm" Disabled="_busy">
+            @if (_busy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> }
+            else { <span>Approve</span> }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public string EmployeeName { get; set; } = "this employee";
+
+    string _comment = "";
+    bool _busy;
+
+    void Cancel() => MudDialog.Cancel();
+
+    void Confirm()
+    {
+        _busy = true;
+        MudDialog.Close(DialogResult.Ok(_comment));
+    }
+}

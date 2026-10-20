@@ -4,6 +4,7 @@ using Orange.Application.Approvals.Approve;
 using Orange.Application.Approvals.GetFinalApprovals;
 using Orange.Application.Approvals.GetInbox;
 using Orange.Application.Approvals.Reject;
+using Orange.Application.Balances.GetMyBalance;
 using Orange.Application.Calendar;
 using Orange.Application.Requests.Cancel;
 using Orange.Application.Requests.GetDetails;
@@ -31,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<GetInboxHandler>();
         services.AddScoped<GetFinalApprovalsHandler>();
         services.AddScoped<GetTeamCalendarHandler>();
+        services.AddScoped<GetMyBalanceHandler>();
 
         return services;
     }

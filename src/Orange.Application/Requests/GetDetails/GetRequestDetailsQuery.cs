@@ -7,6 +7,8 @@ public sealed record GetRequestDetailsQuery(LeaveRequestId RequestId);
 
 public sealed record LeaveRequestDetail(
     LeaveRequestId Id,
+    EmployeeId EmployeeId,
+    string EmployeeName,
     LeaveType Type,
     DateOnly StartDate,
     DateOnly EndDate,

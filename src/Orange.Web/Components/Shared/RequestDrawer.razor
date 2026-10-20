@@ -1,0 +1,235 @@
+@using Orange.Application.Requests.GetDetails
+@using Orange.Application.Requests.Cancel
+@using Orange.Application.Approvals.Approve
+@using Orange.Application.Approvals.Reject
+@inject GetRequestDetailsHandler DetailsHandler
+@inject CancelLeaveRequestHandler CancelHandler
+@inject ApproveRequestHandler ApproveHandler
+@inject RejectRequestHandler RejectHandler
+@inject ICurrentUser CurrentUser
+@inject IDialogService Dialog
+@inject ISnackbar Snackbar
+
+<MudDrawer @bind-Open="_open" Anchor="Anchor.End" Elevation="2"
+           Width="520px" Variant="DrawerVariant.Temporary"
+           Style="max-width:100vw;">
+    @if (_loading)
+    {
+        <div class="pa-6">
+            <MudSkeleton Height="32px" Class="mb-3" />
+            <MudSkeleton Height="20px" Class="mb-2" />
+            <MudSkeleton Height="20px" Class="mb-2" />
+            <MudSkeleton Height="20px" Width="60%" />
+        </div>
+    }
+    else if (_detail is null)
+    {
+        <div class="pa-6 d-flex align-center">
+            <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="Close" Class="me-2" />
+            <MudText Color="Color.Secondary">Select a request to view details.</MudText>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column" style="height:100%;overflow:hidden;">
+            <div class="d-flex align-center pa-4" style="border-bottom:1px solid var(--mud-palette-divider);">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-center gap-2 mb-1">
+                        <MudText Typo="Typo.h6">@LeaveTypeLabel(_detail.Type)</MudText>
+                        <StatusBadge Status="_detail.Status" />
+                    </div>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        @_detail.StartDate.ToString("d MMM yyyy") – @_detail.EndDate.ToString("d MMM yyyy")
+                        · @_detail.Amount @_detail.Unit.ToString().ToLower()
+                    </MudText>
+                    @if (!string.IsNullOrEmpty(_detail.EmployeeName))
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@_detail.EmployeeName</MudText>
+                    }
+                </div>
+                <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="Close" />
+            </div>
+
+            <div class="flex-grow-1 overflow-auto pa-4">
+                @if (!string.IsNullOrEmpty(_detail.Reason))
+                {
+                    <MudText Typo="Typo.body2" Class="mb-4">@_detail.Reason</MudText>
+                }
+
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Approval timeline</MudText>
+                <ApprovalTimeline Steps="_detail.Steps" />
+
+                <MudDivider Class="my-4" />
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    Submitted @_detail.SubmittedAt.ToLocalTime().ToString("d MMM yyyy HH:mm")
+                </MudText>
+            </div>
+
+            @if (_actions.Count > 0)
+            {
+                <div class="pa-4 d-flex gap-2 justify-end"
+                     style="border-top:1px solid var(--mud-palette-divider);">
+                    @foreach (var action in _actions)
+                    {
+                        var a = action;
+                        <MudButton Variant="@a.Variant" Color="@a.Color"
+                                   OnClick="@(async () => await a.Execute())"
+                                   Disabled="_busy">
+                            @a.Label
+                        </MudButton>
+                    }
+                </div>
+            }
+        </div>
+    }
+</MudDrawer>
+
+@code {
+    LeaveRequestDetail? _detail;
+    bool _loading;
+    bool _busy;
+    List<DrawerAction> _actions = [];
+    LeaveRequestId? _loadedId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_requestId.HasValue && _requestId != _loadedId)
+        {
+            _loadedId = _requestId;
+            _loading = true;
+            _detail = null;
+            _actions = [];
+            StateHasChanged();
+
+            try
+            {
+                var result = await DetailsHandler.HandleAsync(new(_requestId.Value));
+                if (result.IsSuccess)
+                {
+                    _detail = result.Value;
+                    BuildActions();
+                }
+            }
+            finally
+            {
+                _loading = false;
+            }
+        }
+        else if (!_requestId.HasValue)
+        {
+            _detail = null;
+            _loadedId = null;
+            _actions = [];
+        }
+    }
+
+    void BuildActions()
+    {
+        if (_detail is null) return;
+        _actions = [];
+
+        var isPending = _detail.Status is RequestStatus.PendingSupervisor or RequestStatus.PendingManager;
+        var isOwner = _detail.EmployeeId == CurrentUser.EmployeeId;
+        var canCancel = isPending && (isOwner || CurrentUser.IsInRole(AppRole.HrAdmin));
+
+        var activeStep = _detail.Steps.FirstOrDefault(s => s.State == StepState.Active);
+        var canAct = activeStep is not null && activeStep.ApproverIds.Contains(CurrentUser.EmployeeId);
+
+        if (canAct)
+        {
+            _actions.Add(new("Approve", Color.Success, Variant.Filled, ApproveAsync));
+            _actions.Add(new("Reject", Color.Error, Variant.Outlined, RejectAsync));
+        }
+
+        if (canCancel)
+            _actions.Add(new("Cancel", Color.Default, Variant.Outlined, CancelAsync));
+    }
+
+    async Task ApproveAsync()
+    {
+        var dialog = await Dialog.ShowAsync<ApproveDialog>("Approve request",
+            new DialogParameters<ApproveDialog>
+            {
+                { x => x.EmployeeName, _detail!.EmployeeName }
+            });
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        _busy = true;
+        try
+        {
+            var comment = result.Data as string;
+            var r = await ApproveHandler.HandleAsync(new ApproveRequestCommand(_detail!.Id, comment, null));
+            if (r.IsSuccess)
+            {
+                Snackbar.Add("Request approved.", Severity.Success);
+                await CloseAndRefresh();
+            }
+            else
+                Snackbar.Add(r.Error?.Message ?? "Could not approve.", Severity.Error);
+        }
+        finally { _busy = false; }
+    }
+
+    async Task RejectAsync()
+    {
+        var dialog = await Dialog.ShowAsync<RejectDialog>("Reject request",
+            new DialogParameters<RejectDialog>
+            {
+                { x => x.EmployeeName, _detail!.EmployeeName }
+            });
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        _busy = true;
+        try
+        {
+            var reason = result.Data as string ?? "";
+            var r = await RejectHandler.HandleAsync(
+                new RejectRequestCommand(_detail!.Id, reason, null));
+            if (r.IsSuccess)
+            {
+                Snackbar.Add("Request rejected.", Severity.Success);
+                await CloseAndRefresh();
+            }
+            else
+                Snackbar.Add(r.Error?.Message ?? "Could not reject.", Severity.Error);
+        }
+        finally { _busy = false; }
+    }
+
+    async Task CancelAsync()
+    {
+        _busy = true;
+        try
+        {
+            var r = await CancelHandler.HandleAsync(
+                new CancelLeaveRequest(_detail!.Id, "Cancelled by employee"));
+            if (r.IsSuccess)
+            {
+                Snackbar.Add("Request cancelled.", Severity.Success);
+                await CloseAndRefresh();
+            }
+            else
+                Snackbar.Add(r.Error?.Message ?? "Could not cancel.", Severity.Error);
+        }
+        finally { _busy = false; }
+    }
+
+    async Task CloseAndRefresh()
+    {
+        _open = false;
+        if (_onActed is not null)
+            await _onActed();
+    }
+
+    void Close() { _open = false; }
+
+    static string LeaveTypeLabel(LeaveType t) => t switch
+    {
+        LeaveType.Annual => "Annual leave",
+        LeaveType.Sick   => "Sick leave",
+        LeaveType.Unpaid => "Unpaid leave",
+        _                => t.ToString(),
+    };
+}

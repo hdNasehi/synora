@@ -1,17 +1,119 @@
 ﻿@inherits LayoutComponentBase
+@inject ICurrentUser CurrentUser
+@inject NavigationManager Nav
 
-<MudThemeProvider />
+<MudThemeProvider Theme="OrangeTheme.Instance" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1">
-        <img src="orange-logo.webp" alt="Orange" style="height: 32px" class="me-2" />
-        <MudText Typo="Typo.h6">Orange</MudText>
+    <MudAppBar Elevation="0" Style="border-bottom: 1px solid var(--mud-palette-divider);">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
+                       Edge="Edge.Start" OnClick="@ToggleDrawer" />
+        <MudText Typo="Typo.h6" Class="ms-2 me-4" Style="font-weight:700;letter-spacing:-.3px;">Orange</MudText>
         <MudSpacer />
+        <MudText Typo="Typo.body2" Color="Color.Default" Class="me-4 d-none d-sm-block">
+            @DateTime.Today.ToString("dddd, d MMMM yyyy")
+        </MudText>
+        <MudMenu Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" AnchorOrigin="Origin.BottomRight">
+            @foreach (var p in PersonaSwitcherCurrentUser.Available)
+            {
+                var isCurrent = p.Value.Name == _personaName;
+                <MudMenuItem Href="@($"/switch-persona/{p.Key}")" ForceLoad="true">
+                    <div class="d-flex align-center gap-2">
+                        @if (isCurrent)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" />
+                        }
+                        else
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Color="Color.Default" />
+                        }
+                        <div>
+                            <MudText Typo="Typo.body2" Style="font-weight:500">@p.Value.Name</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                @string.Join(", ", p.Value.Roles.Select(r => r.ToString()))
+                            </MudText>
+                        </div>
+                    </div>
+                </MudMenuItem>
+            }
+        </MudMenu>
     </MudAppBar>
-    <MudMainContent Class="pa-4">
+
+    <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Responsive" Elevation="0"
+               Style="border-inline-end: 1px solid var(--mud-palette-divider);">
+        <MudDrawerHeader LinkToIndex="true">
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase;letter-spacing:.06em;font-weight:600;">
+                Navigation
+            </MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavGroup Title="My Leave" Icon="@Icons.Material.Filled.CalendarToday" Expanded="true">
+                <MudNavLink Href="/" Match="NavLinkMatch.All"
+                            Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+                <MudNavLink Href="/request"
+                            Icon="@Icons.Material.Filled.AddCircleOutline">Request leave</MudNavLink>
+                <MudNavLink Href="/my-requests"
+                            Icon="@Icons.Material.Filled.FormatListBulleted">My requests</MudNavLink>
+            </MudNavGroup>
+
+            @if (CurrentUser.IsInRole(AppRole.Supervisor))
+            {
+                <MudNavGroup Title="Approvals" Icon="@Icons.Material.Filled.Inbox" Expanded="true">
+                    <MudNavLink Href="/inbox"
+                                Icon="@Icons.Material.Filled.Inbox">Inbox</MudNavLink>
+                </MudNavGroup>
+            }
+
+            @if (CurrentUser.IsInRole(AppRole.Manager))
+            {
+                <MudNavGroup Title="Management" Icon="@Icons.Material.Filled.SupervisorAccount" Expanded="true">
+                    <MudNavLink Href="/final-approvals"
+                                Icon="@Icons.Material.Filled.DoneAll">Final approvals</MudNavLink>
+                    <MudNavLink Href="/manager"
+                                Icon="@Icons.Material.Filled.People">Team overview</MudNavLink>
+                </MudNavGroup>
+            }
+
+            @if (CurrentUser.IsInRole(AppRole.HrAdmin))
+            {
+                <MudNavGroup Title="HR Admin" Icon="@Icons.Material.Filled.ManageAccounts" Expanded="true">
+                    <MudNavLink Href="/manager"
+                                Icon="@Icons.Material.Filled.People">All teams</MudNavLink>
+                </MudNavGroup>
+            }
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="pa-4 pa-sm-6">
         @Body
     </MudMainContent>
 </MudLayout>
+
+@code {
+    bool _drawerOpen = true;
+    string _personaName = "";
+
+    protected override void OnInitialized()
+    {
+        _personaName = CurrentUser is PersonaSwitcherCurrentUser pcu
+            ? PersonaSwitcherCurrentUser.Available
+                .Values.FirstOrDefault(p => p.Key == GetCurrentKey())?.Name ?? ""
+            : "";
+    }
+
+    string GetCurrentKey()
+    {
+        // Resolve display name by matching EmployeeId against seed
+        var empId = CurrentUser.EmployeeId.Value;
+        return PersonaSwitcherCurrentUser.Available
+            .FirstOrDefault(p =>
+                Orange.Infrastructure.Persistence.Seed.DevelopmentSeeder.SeedIds
+                    .TryGetValue(p.Key, out var id) && id == empId)
+            .Key ?? "e01";
+    }
+
+    void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+}

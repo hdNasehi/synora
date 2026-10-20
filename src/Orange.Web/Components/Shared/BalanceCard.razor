@@ -1,0 +1,50 @@
+@using Orange.Domain.Balances
+
+<MudPaper Class="pa-4" Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 10px;">
+    <div class="d-flex align-center justify-space-between mb-3">
+        <MudText Typo="Typo.subtitle1">Annual leave balance @Year</MudText>
+        <MudText Typo="Typo.h5" Style="font-weight:700;color:var(--mud-palette-primary)">
+            @Balance.Available <MudText Typo="Typo.caption" Inline="true">@Balance.Unit.ToString().ToLower()</MudText>
+        </MudText>
+    </div>
+
+    @* Segmented progress bar: approved solid, pending striped *@
+    @{
+        var total = Balance.Entitlement + Balance.CarryOver + Balance.Adjustments;
+        var approvedPct = total > 0 ? (double)(Balance.Approved / total) * 100 : 0;
+        var pendingPct  = total > 0 ? (double)(Balance.Pending  / total) * 100 : 0;
+    }
+    <div style="height:8px;border-radius:4px;background:var(--mud-palette-divider);overflow:hidden;margin-bottom:12px;">
+        <div style="height:100%;display:flex;">
+            <div style="width:@(approvedPct.ToString("F1"))%;background:var(--mud-palette-success);"></div>
+            <div style="width:@(pendingPct.ToString("F1"))%;background:repeating-linear-gradient(
+                -45deg,var(--mud-palette-warning) 0,var(--mud-palette-warning) 4px,transparent 4px,transparent 8px);"></div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column gap-1">
+        <BalanceLine Label="Entitlement" Value="Balance.Entitlement" Unit="@Balance.Unit" />
+        @if (Balance.CarryOver != 0)
+        {
+            <BalanceLine Label="Carry-over" Value="Balance.CarryOver" Unit="@Balance.Unit" />
+        }
+        @if (Balance.Adjustments != 0)
+        {
+            <BalanceLine Label="Adjustments" Value="Balance.Adjustments" Unit="@Balance.Unit" />
+        }
+        <BalanceLine Label="Taken" Value="@(-Balance.Taken)" Unit="@Balance.Unit" Muted="true" />
+        @if (Balance.Scheduled > 0)
+        {
+            <BalanceLine Label="Scheduled" Value="@(-Balance.Scheduled)" Unit="@Balance.Unit" Muted="true" />
+        }
+        @if (Balance.Pending > 0)
+        {
+            <BalanceLine Label="Pending" Value="@(-Balance.Pending)" Unit="@Balance.Unit" Muted="true" />
+        }
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired] public LeaveBalance Balance { get; set; } = null!;
+    [Parameter] public int Year { get; set; } = DateTime.Today.Year;
+}

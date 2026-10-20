@@ -1,0 +1,47 @@
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Reject request</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">
+            Reject the leave request for <strong>@EmployeeName</strong>?
+            A reason is required (minimum 10 characters).
+        </MudText>
+        <MudTextField @bind-Value="_reason" Label="Reason" Lines="3"
+                      Variant="Variant.Outlined" Required="true"
+                      Error="@_showError" ErrorText="@_errorText"
+                      Counter="10" MaxLength="500" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled"
+                   OnClick="Confirm" Disabled="_busy">
+            @if (_busy) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> }
+            else { <span>Reject request</span> }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public string EmployeeName { get; set; } = "this employee";
+
+    string _reason = "";
+    bool _busy;
+    bool _showError;
+    string _errorText = "";
+
+    void Cancel() => MudDialog.Cancel();
+
+    void Confirm()
+    {
+        if (_reason.Trim().Length < 10)
+        {
+            _showError = true;
+            _errorText = "Reason must be at least 10 characters.";
+            return;
+        }
+        _busy = true;
+        MudDialog.Close(DialogResult.Ok(_reason.Trim()));
+    }
+}

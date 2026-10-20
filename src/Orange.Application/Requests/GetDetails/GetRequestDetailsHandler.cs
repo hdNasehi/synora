@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Orange.Application.Abstractions;
 using Orange.Domain.Common;
+using Orange.Domain.Employees;
 
 namespace Orange.Application.Requests.GetDetails;
 
@@ -35,6 +36,10 @@ public sealed class GetRequestDetailsHandler
         if (!canView)
             return new Error("Forbidden", "Not authorized to view this request.");
 
+        var employee = await _db.Employees
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == request.EmployeeId, ct);
+
         var steps = request.Steps
             .OrderBy(s => s.Order)
             .Select(s => new ApprovalStepDetail(
@@ -44,7 +49,8 @@ public sealed class GetRequestDetailsHandler
             .ToList();
 
         return new LeaveRequestDetail(
-            request.Id, request.Type, request.StartDate, request.EndDate,
+            request.Id, request.EmployeeId, employee?.FullName ?? "",
+            request.Type, request.StartDate, request.EndDate,
             request.PartialTime, request.Amount, request.Unit, request.Reason,
             request.Status, request.Calculation, steps, request.SubmittedAt);
     }
